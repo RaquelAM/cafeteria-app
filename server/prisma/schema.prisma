@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(MESERO)
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String?
+  phone     String   @unique
+  notes     String?
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Product {
+  id        String   @id @default(uuid())
+  name      String
+  price     Float
+  category  String
+  available Boolean  @default(true)
+  createdAt DateTime @default(now())
+  orderItems OrderItem[]
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  customerId  String?
+  customer    Customer?   @relation(fields: [customerId], references: [id])
+  tableNumber String?
+  status      OrderStatus @default(PENDING)
+  total       Float       @default(0)
+  type        OrderType   @default(DINE_IN)
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  items       OrderItem[]
+  splits      Split[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float   // Precio al momento de la venta
+  notes     String?
+}
+
+model Split {
+  id         String  @id @default(uuid())
+  orderId    String
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  personName String
+  amount     Float
+  paid       Boolean @default(false)
+}
+
+enum Role {
+  ADMIN
+  MESERO
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderType {
+  DINE_IN
+  TAKEAWAY
+}
