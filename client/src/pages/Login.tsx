@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
+import axios from 'axios'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -6,17 +9,30 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    setTimeout(() => {
-      console.log('Login con:', { email, password })
+    try {
+      // Llamar al contexto de autenticación
+      await login(email, password)
+      
+      // Redirigir al dashboard
+      navigate('/dashboard')
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        setError(err.response.data.error || 'Error al iniciar sesión')
+      } else {
+        setError('Error de conexión con el servidor')
+      }
+    } finally {
       setLoading(false)
-      alert('Login simulado (conectaremos con el backend después)')
-    }, 1000)
+    }
   }
 
   return (
