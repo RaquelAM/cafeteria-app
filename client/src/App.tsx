@@ -3,16 +3,15 @@ import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
+import Products from './pages/Products'  // ← NUEVO
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Ruta pública: login */}
           <Route path="/login" element={<Login />} />
           
-          {/* Ruta protegida: dashboard */}
           <Route 
             path="/dashboard" 
             element={
@@ -22,10 +21,16 @@ function App() {
             } 
           />
           
-          {/* Redirigir raíz a login */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route 
+            path="/products" 
+            element={
+              <ProtectedRoute>
+                <Products />
+              </ProtectedRoute>
+            } 
+          />
           
-          {/* Ruta 404 para URLs no existentes */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
